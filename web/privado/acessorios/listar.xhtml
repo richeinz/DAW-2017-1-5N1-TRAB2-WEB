@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:composition template="/templates/template.xhtml">
+        <ui:define name="titulo">Manutenção Acessorio</ui:define>
+        <ui:define name="conteudo">
+            <h:form id="formListagem">
+                <p:growl/>
+                <p:messages/>
+                <p:commandButton value="Novo"
+                                 actionListener="#{controleAcessorios.novo()}"                                 
+                                 icon="ui-icon-plus"
+                                 oncomplete="PF('dlg').show();"
+                                 update=":formEdicao"/>
+                <div align="center">
+                    <p:panelGrid columns="11">
+                        <p:outputLabel value="Ordem:"/>
+                        <p:selectOneMenu id="ordem" value="#{controleAcessorios.dao.ordem}">
+                            <f:selectItem itemLabel="ID" itemValue="id"/>
+                            <f:selectItem itemLabel="Descrição" itemValue="descricao"/> 
+                            <p:ajax update="listagem"/>
+                        </p:selectOneMenu>     
+                        <p:outputLabel value="Filtro:"/>
+                        <p:inputText value="#{controleAcessorios.dao.filtro}" size="30">
+                            <p:ajax update="listagem" event="keyup"/>
+                        </p:inputText>
+                        <p:commandButton value="Filtrar" update="listagem"/>
+                        <p:outputLabel value="Máximo de objetos: "/>
+                        <p:inputText value="#{controleAcessorios.dao.maximoObjetos}" size="3">
+                            <p:ajax update="listagem" event="keyup"/>
+                        </p:inputText>
+                        <p:commandButton value="Primeiro"
+                                         actionListener="#{controleAcessorios.dao.primeiro()}"
+                                         update="listagem"/>
+                        <p:commandButton value="Anterior"
+                                         actionListener="#{controleAcessorios.dao.anterior()}"
+                                         update="listagem"/>                        
+                        <p:commandButton value="Próximo"
+                                         actionListener="#{controleAcessorios.dao.proximo()}"
+                                         update="listagem"/>  
+                        <p:commandButton value="Último"
+                                         actionListener="#{controleAcessorios.dao.ultimo()}"
+                                         update="listagem"/>                        
+                    </p:panelGrid>
+                </div>
+                <p:dataTable value="#{controleAcessorios.dao.listaObjetos}"
+                             var="obj" id="listagem" >
+                    <f:facet name="footer">
+                        <p:outputLabel value="#{controleAcessorios.dao.mensagemNavegacao}"/>
+                    </f:facet>
+                    <p:column headerText="ID">
+                        <p:outputLabel value="#{obj.id}"/>
+                    </p:column>
+                    <p:column headerText="Descrição">
+                        <p:outputLabel value="#{obj.descricao}"/>
+                    </p:column>                     
+                    <p:column headerText="Ações">
+                        <div align="center">
+                            <p:commandButton actionListener="#{controleAcessorios.editar(obj.id)}"
+                                             icon="ui-icon-pencil"                                             
+                                             title="Editar"
+                                             oncomplete="PF('dlg').show();"
+                                             update=":formEdicao"/>
+                            <p:commandButton actionListener="#{controleAcessorios.remover(obj.id)}"
+                                             icon="ui-icon-trash" update="@form"
+                                             title="Remover"
+                                             onclick="if (!confirm('Confirma a exclusão?'))
+                                                         return false"/>
+                        </div>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </ui:define>
+        <ui:define name="dialogos">
+            <p:dialog widgetVar="dlg" header="Edição" modal="true" resizable="false"
+                      position="center,top">
+                <h:form id="formEdicao">
+                    <p:growl/>
+                    <div align="center">
+                        <p:panelGrid columns="2">
+                            <f:facet name="footer">
+                                <div align="center">
+                                    <p:commandButton value="Salvar"
+                                                     icon="ui-icon-disk"
+                                                     actionListener="#{controleAcessorios.salvar()}"
+                                                     oncomplete="if(!args.validationFailed){PF('dlg').hide();}"
+                                                     update=":formEdicao :formListagem"/>
+                                </div>
+                            </f:facet>
+                            <p:outputLabel value="ID"/>
+                            <p:inputText value="#{controleAcessorios.objeto.id}" size="10"/>
+                            <p:outputLabel value="Descrição" for="txtDescricao"/>
+                            <p:inputText id="txtDescricao" value="#{controleAcessorios.objeto.descricao}"
+                                         size="50" maxlength="50" placeholder="Obrigatório"/>                                                                           
+                        </p:panelGrid>
+                    </div>
+                </h:form>
+                <ui:include src="/templates/ajaxstatus.xhtml"/>
+            </p:dialog>
+        </ui:define>
+    </ui:composition>
+</html>
+

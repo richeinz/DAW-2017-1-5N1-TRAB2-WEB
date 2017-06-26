@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:composition template="/templates/template.xhtml">
+        <ui:define name="titulo">Listagem de Carros</ui:define>
+        <ui:define name="conteudo">
+            <h:form id="formListagem" prependId="false">
+                <p:growl/>
+                <p:commandButton actionListener="#{controleCarro.novo()}"
+                                 value="Novo Carro" icon="ui-icon-plus"
+                                 oncomplete="PF('dlg').show();"
+                                 update=":formEdicao"/>
+                <div align="center">
+                    <p:panelGrid columns="11">
+                        <p:outputLabel value="Ordem:"/>
+                        <p:selectOneMenu id="ordem" value="#{controleCarro.dao.ordem}">
+                            <f:selectItem itemLabel="ID" itemValue="id"/>
+                            <f:selectItem itemLabel="Placa" itemValue="placa"/>              
+                            <f:selectItem itemLabel="Pessoa" itemValue="pessoa.nome"/>
+                            <p:ajax update="listagem"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="Filtro: "/>
+                        <p:inputText value="#{controleCarro.dao.filtro}">
+                            <p:ajax event="keyup" update="listagem"/>
+                        </p:inputText>
+                        <p:commandButton value="Filtrar" update="listagem"/>
+                        <p:outputLabel value="Máximo de objetos"/>
+                        <p:inputText value="#{controleCarro.dao.maximoObjetos}" size="5">
+                            <p:ajax event="keyup" update="listagem"/>
+                        </p:inputText>
+                        <p:commandButton action="#{controleCarro.dao.primeiro()}"
+                                         value="Primeiro" update="listagem"/>
+                        <p:commandButton action="#{controleCarro.dao.anterior()}"
+                                         value="Anterior" update="listagem"/>
+                        <p:commandButton action="#{controleCarro.dao.proximo()}"
+                                         value="Próximo" update="listagem"/>
+                        <p:commandButton action="#{controleCarro.dao.ultimo()}"
+                                         value="Ultimo" update="listagem"/>
+                    </p:panelGrid>
+                </div>
+                <p:dataTable value="#{controleCarro.dao.listaObjetos}" var="obj"
+                             id="listagem">
+                    <f:facet name="header">
+                        <p:outputLabel value="Listagem de Carros"/>
+                    </f:facet>
+                    <f:facet name="footer">
+                        <p:outputLabel value="#{controleCarro.dao.mensagemNavegacao}"/>
+                    </f:facet>
+                    <p:column headerText="ID">
+                        <p:outputLabel value="#{obj.id}"/>
+                    </p:column>
+                    <p:column headerText="Placa">
+                        <p:outputLabel value="#{obj.placa}"/>
+                    </p:column>                    
+                    <p:column headerText="Ano Fabricação">
+                        <p:outputLabel value="#{obj.anoFabricacao}"/>
+                    </p:column>                    
+                    <p:column headerText="Ano Modelo">
+                        <p:outputLabel value="#{obj.anoModelo}"/>
+                    </p:column>
+                    <p:column headerText="Fabricante">
+                        <p:outputLabel value="#{obj.fabricante}"/>
+                    </p:column>
+                    <p:column headerText="Modelo">
+                        <p:outputLabel value="#{obj.modelo}"/>
+                    </p:column>
+                    <p:column headerText="Renavam">
+                        <p:outputLabel value="#{obj.renavam}"/>
+                    </p:column>
+                    <p:column headerText="Pessoa">
+                        <p:outputLabel value="#{obj.pessoa.nome}"/>
+                    </p:column>
+                    <p:column headerText="Ações">
+                        <div align="center">
+                            <p:commandButton
+                                actionListener="#{controleCarro.editar(obj.id)}"
+                                icon="ui-icon-pencil"
+                                update=":formEdicao"
+                                process="@form"
+                                oncomplete="PF('dlg').show();"
+                                id="btnAlterar"/>
+                            <p:commandButton
+                                actionListener="#{controleCarro.remover(obj.id)}"
+                                icon="ui-icon-trash"
+                                update="@form"
+                                process="@form"
+                                id="btnExcluir"
+                                onclick="if (!confirm('Confirma a exclusão do objeto'))
+                                            return false"/>                           
+                        </div>
+                    </p:column>                    
+                </p:dataTable>
+            </h:form>
+        </ui:define>
+        <ui:define name="dialogos">
+            <p:dialog widgetVar="dlg" header="Edição" resizable="false" modal="true"
+                      width="700" height="450">
+                <h:form id="formEdicao" prependId="false">
+                    <p:growl id="growl"/>
+                    <p:tabView id="tab">
+                        <p:tab title="Dados Principais">
+                            <div align="center">
+                                <p:panelGrid columns="2">
+                                    <f:facet name="footer">
+                                        <div align="center">
+                                            <p:commandButton value="Salvar"
+                                                             icon="ui-icon-disk"
+                                                             actionListener="#{controleCarro.salvar()}"
+                                                             update=":formEdicao :formListagem"
+                                                             oncomplete="if(!args.validationFailed){PF('dlg').hide();}"/>
+                                        </div>
+                                    </f:facet>
+                                    <p:outputLabel value="ID"/>
+                                    <p:inputText value="#{controleCarro.objeto.id}" readonly="true" size="10"/>
+                                    <p:outputLabel value="Placa" for="txtPlaca"/>
+                                    <p:inputText id="txtPlaca" value="#{controleCarro.objeto.placa}"/>
+                                    <p:outputLabel value="Ano Fabricação" for="txtAnoFab"/>
+                                    <p:inputText id="txtAnoFab" value="#{controleCarro.objeto.anoFabricacao}"/>
+                                    <p:outputLabel value="Ano Modelo" for="txtAnoMod"/>
+                                    <p:inputText id="txtAnoMod" value="#{controleCarro.objeto.anoModelo}"/>
+                                    <p:outputLabel value="Fabricante" for="txtFabricante"/>
+                                    <p:inputText id="txtFabricante" value="#{controleCarro.objeto.fabricante}"/>
+                                    <p:outputLabel value="Modelo" for="txtModelo"/>
+                                    <p:inputText id="txtModelo" value="#{controleCarro.objeto.modelo}"/>
+                                    <p:outputLabel value="Renavam" for="txtRenavam"/>
+                                    <p:inputText id="txtRenavam" value="#{controleCarro.objeto.renavam}"/>
+                                    <p:outputLabel value="Usuário" for="selectPessoa"/>
+                                    <p:selectOneMenu id="selectPessoa"
+                                                     value="#{controleCarro.objeto.pessoa}">
+                                        <f:converter converterId="converterPessoa"/>
+                                        <f:selectItem itemLabel="Selecione um registro"
+                                                      noSelectionOption="true"/>
+                                        <f:selectItems value="#{controleCarro.daoPessoa.listaTodos}"
+                                                       var="p" itemLabel="#{p.nome}"/>
+                                    </p:selectOneMenu>
+                                </p:panelGrid>
+                            </div>
+                        </p:tab>
+                        <p:tab title="Acessorios">
+                            <p:dataTable value="#{controleCarro.objeto.listaAcessorio}"
+                                         var="ace" rowIndexVar="idxace" id="listaAcessorio">
+                                <f:facet name="header">
+                                    <p:panelGrid columns="2">
+                                        <p:selectOneMenu value="#{controleCarro.acessorios}"
+                                                         id="selectAcessorio">
+                                            <f:converter converterId="converterAcessorio"/>
+                                            <f:selectItem itemLabel="Selecione um registro"
+                                                          noSelectionOption="true"/>
+                                            <f:selectItems value="#{controleCarro.daoAcessorios.listaTodos}"
+                                                           var="a" itemLabel="#{a.descricao}"/>
+                                        </p:selectOneMenu>
+                                        <p:commandButton value="Adicionar"
+                                                         actionListener="#{controleCarro.adicionarAcessorio()}"
+                                                         update="listaAcessorio :formEdicao:growl"
+                                                         id="btnAdicionarAcessorio"
+                                                         process="btnAdicionarAcessorio selectAcessorio"
+                                                         icon="ui-icon-plus"/>
+                                    </p:panelGrid>
+                                </f:facet>
+                                <p:column headerText="Acessorio">
+                                    <p:outputLabel value="#{ace.descricao}"/>
+                                </p:column>
+                                <p:column headerText="Ações">
+                                    <p:commandButton id="btnRemoverAcessorio"
+                                                     actionListener="#{controleCarro.removerAcessorio(index)}"
+                                                     process="btnRemoverAcessorio"
+                                                     update="listaAcessorio :formEdicao:growl"
+                                                     icon="ui-icon-trash"
+                                                     onclick="if (!confirm('Confirma a exclusão do objeto?'))
+                                                                     return false"/>
+                                </p:column>
+                            </p:dataTable>
+                        </p:tab>
+
+                    </p:tabView>
+                </h:form>
+                <ui:include src="/templates/ajaxstatus.xhtml"/>
+            </p:dialog>
+        </ui:define>         
+    </ui:composition>
+</html>
+
+
+
